@@ -9,7 +9,6 @@ Not to be mistaken for [The Net Wide Assembler](https://www.nasm.us/)
 
 NASM (Not ASM) is an interpreted language that looks like ASM.
 
-It is 
 ###### *"What a python dev thinks low level programming looks like"*
 It is complete with virtual memory slots (A1-Z10000)
 
