@@ -17,23 +17,23 @@ It's ISA contains 9 instructions.
 ---
 
 ## How to use???
-    ```txt
-    Memory is defined as such:
-        A1, B1, C1
-        A2, B2, C2
-        etc.
+```txt
+Memory is defined as such:
+    A1, B1, C1
+    A2, B2, C2
+    etc.
 
-    instructions:
-        ADD - Adds a number OR a 1 character string to a memory slot
-        SUB - Subtracts a number from a memory slot
-        INP - Takes in user input and stores EACH character into a specified memory slot
-        PRINT - Prints whatever is contained in a memory slot
-        MOV - Copy values from one memory slot to another
-        CMP - Compares values from two memory slots
-        BNC - Bounces to a LOOP defined by the LOOP **Loop_Name** label
-        BEQ - Bounce but conditional, basically bounce if last CMP was equal
-        LOOP - Defines a named location that BNC/BEQ can bounce to
-    ```
+instructions:
+    ADD - Adds a number OR a 1 character string to a memory slot
+    SUB - Subtracts a number from a memory slot
+    INP - Takes in user input and stores EACH character into a specified memory slot
+    PRINT - Prints whatever is contained in a memory slot
+    MOV - Copy values from one memory slot to another
+    CMP - Compares values from two memory slots
+    BNC - Bounces to a LOOP defined by the LOOP **Loop_Name** label
+    BEQ - Bounce but conditional, basically bounce if last CMP was equal
+    LOOP - Defines a named location that BNC/BEQ can bounce to
+```
 
 For reference look at test.nasm
 
