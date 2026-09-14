@@ -34,7 +34,7 @@ Instructions:
     IFGR - Jumps 1 line forward if in the last CMP first value is greater than second
     IFLR - Jumps 1 line forward if in the last CMP first value is lesser than second
     CALL - Calls a file and makes interpreter read that file
-    Return - Returns to the original root file
+    RETURN - Returns to the original root file
 Labels:
     LOOP - Defines a named location that BNC/BEQ can bounce to
 """
