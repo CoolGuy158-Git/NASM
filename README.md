@@ -72,6 +72,7 @@ python interpreter.py test.nasm
 - Or even better, FIX IT AND PR!!!
 - Also like add more ISA but keep it simple perhaps even just modifications of existing one, and keep it feeling low level
 - Create custom modules hehe
+- If you want to make a custom stdlib make sure its simple and friendly and first line must contain: <small>;  {LIB NAME} Made by: {Your GitHub profile link}</small>
 
 ## NOTES
 
