@@ -8,7 +8,7 @@
 ```
 - When making changes to the interpreter or other python files add necessary comments explaining your changes
 - When making python files add this comment as first line
-```nasm
+```python
 # {FILE NAME} Made by: {Your GitHub profile link}
 ```
 
