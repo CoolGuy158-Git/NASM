@@ -16,7 +16,7 @@ It also has registers (CA1-CZ100), representing 2.6 KB in the virtual CPU archit
 
 <small>(Not the actual Python memory usage this assumes each slot = 1 byte.)</small>
 
-It's ISA contains 21 instructions.
+It's ISA contains 23 instructions.
 
 ---
 
@@ -29,6 +29,10 @@ It's ISA contains 21 instructions.
     Registers are defined as such:
         CA1, CB1, CC1,
         CA2, CB2, CC2,
+        etc.
+    HDD slots are defined as such:
+        HA1, HB1, HB1, 
+        HA2, HB2, HC2,
         etc.
     Instructions:
         SET - Sets a register/memory slot to a given value or character
@@ -46,17 +50,20 @@ It's ISA contains 21 instructions.
         BEQ - Bounce but conditional, basically bounce if last CMP was equal
         SIFEQ - Stop if equal, stops a loop if last CMP is equal
         SIFNEQ - Stop if not equal, stops a loop if last CMP is not equal
-        IFEQ - Jumps 1 line forward if last CMP is equal
-        INEQ - Jumps 1 line forward if last CMP is not equal
-        IFGR - Jumps 1 line forward if in the last CMP first value is greater than second
-        IFLR - Jumps 1 line forward if in the last CMP first value is lesser than second
+        IFEQ - Jumps by a defined number of lines or 1 line forward if last CMP is equal
+        INEQ - Jumps by a defined number of lines or 1 line line forward if last CMP is not equal
+        IFGR - Jumps by a defined number of lines or 1 line line forward if in the last CMP first value is greater than second
+        IFLR - Jumps by a defined number of lines or 1 line line forward if in the last CMP first value is lesser than second
         CALL - Calls a file and makes interpreter read that file
         RETURN - Returns to the original root file
+        COSLOT - Clears all occupied slots on HDD
+        CFSLOT - Clears specific slots on HDD
     Labels:
         LOOP - Defines a named location that BNC/BEQ can bounce to
     ```
+For more info click [here](Learn_NASM.md)
 
-For reference look at test.nasm
+For reference look at the [test file](test.nasm)
 
 To run the test file simply:
 
@@ -64,17 +71,15 @@ To run the test file simply:
 python interpreter.py test.nasm
 ```
 
----
-
-## Contributing
-
-- Report bugs if you find any!
-- Or even better, FIX IT AND PR!!!
-- Also like add more ISA but keep it simple perhaps even just modifications of existing one, and keep it feeling low level
-- Create custom modules hehe
-- If you want to make a custom stdlib make sure its simple and friendly and first line must contain: <small>;  {LIB NAME} Made by: {Your GitHub profile link}</small>
-
 ## NOTES
 
 - Keep Z100-Z999 unallocated for stdlibs and/or other modules
 - Also make sure seed inputted in random is 1-491 anything higher will yea segfault (eventually)
+- The only thing's that can read/write directly to HDD is SET, PRINT, and MOV, otherwise you'd have to move the thing into memory first before use
+- Run [hdd genertor](extras/hdd_gen.py) before using the interpreter
+
+## Links
+
+- Tutorial: [Learn](Learn_NASM.md)
+- Contributing: [Contributor](CONTRIBUTING.md)
+- Installing and setup: [Installation](INSTALLATION.md)

@@ -13,6 +13,10 @@ Registers are defined as such:
     CA1, CB1, CC1,
     CA2, CB2, CC2,
     etc.
+HDD slots are defined as such:
+    HA1, HB1, HB1,
+    HA2, HB2, HC2,
+    etc.
 Instructions:
     SET - Sets a register/memory slot to a given value or character
     ADD - Adds a number to a register/memory slot or sets it to 1 char string
@@ -29,12 +33,14 @@ Instructions:
     BEQ - Bounce but conditional, basically bounce if last CMP was equal
     SIFEQ - Stop if equal, stops a loop if last CMP is equal
     SIFNEQ - Stop if not equal, stops a loop if last CMP is not equal
-    IFEQ - Jumps 1 line forward if last CMP is equal
-    INEQ - Jumps 1 line forward if last CMP is not equal
-    IFGR - Jumps 1 line forward if in the last CMP first value is greater than second
-    IFLR - Jumps 1 line forward if in the last CMP first value is lesser than second
+    IFEQ - Jumps by a defined number of lines or 1 line forward if last CMP is equal
+    INEQ - Jumps by a defined number of lines or 1 line line forward if last CMP is not equal
+    IFGR - Jumps by a defined number of lines or 1 line line forward if in the last CMP first value is greater than second
+    IFLR - Jumps by a defined number of lines or 1 line line forward if in the last CMP first value is lesser than second
     CALL - Calls a file and makes interpreter read that file
     RETURN - Returns to the original root file
+    COSLOT - Clears all occupied slots on HDD
+    CFSLOT - Clears specific slots on HDD
 Labels:
     LOOP - Defines a named location that BNC/BEQ can bounce to
 """
@@ -50,6 +56,40 @@ memory_amount = 10000
 register_amount = 100
 print_info = True
 
+hdd = open("components/NASM.hdd", "r+b")
+
+# Special read, write and index for hdd cuz it special
+# The only thing's that can read/write directly to HDD is SET, PRINT, and MOV, otherwise you'd have to move the thing into memory first before use
+def hdd_index(address): # Turn the hdd bins into like readable for python
+    letter = ord(address[1]) - ord('A')
+    number = int(address[2:]) - 1
+    return (number*26+letter)*4
+def read_hdd(address):
+    hdd.seek(hdd_index(address))
+    data = hdd.read(4)
+    kind_of_data = data[0]
+    value = int.from_bytes(data[1:], byteorder='little')
+    if kind_of_data == 0:
+        return ""
+    elif kind_of_data == 1:
+        return value
+    elif kind_of_data == 2:
+        return chr(value)
+def write_hdd(address, value):
+    hdd.seek(hdd_index(address))
+    if value == "":
+        data = b"\x00\x00\x00\x00"
+    elif isinstance(value, int):
+        if value<0 or value >999:
+            print("\nERROR\nHDD slots can only hold one character strings and 3 digit integers.")
+            return
+        data = bytes([1]) + value.to_bytes(3, "little")
+    elif isinstance(value, str) and len(value) == 1:
+        data = bytes([2])+ord(value).to_bytes(3, "little")
+    else:
+        print("\nERROR\nHDD slots can only hold one character strings and 3 digit integers.")
+        return
+    hdd.write(data)
 ticks_per_sec = 0
 if print_info:
     # Get approx clock speed for info
@@ -123,6 +163,15 @@ while line_number < len(lines):
                             print(f"\nERROR \n'{line}'\nStrings must be enclosed in double quotes.")
                 else:
                     print(f"\nERROR \n'{line}'\nRegistry slots can only hold one character strings and 3 digit integers.")  # Dude istg one digit integers we're a bug then I realized they made sense sooo it's a feature now!
+            elif line.split()[1].startswith("H"):
+                if line.split(maxsplit=2)[2].startswith('"') and line.split(maxsplit=2)[2].endswith('"'):
+                    write_hdd(line.split()[1].rstrip(","), line.split(maxsplit=2)[2].strip('"')) # Be thankful i added sum coma tolerance, it isnt even supposed to be used
+                else:
+                    try:
+                        product = int(line.split(maxsplit=2)[2].strip('"'))
+                        write_hdd(line.split()[1].rstrip(","), product)
+                    except ValueError:
+                        print(f"\nERROR \n'{line}'\nStrings must be enclosed in double quotes.")
             else:
                 time.sleep(0.0001) # Little delay to artificially simulate uhh yea yea
                 if len(line.split(maxsplit=2)[2].strip('"')) == 1 if line.split(maxsplit=2)[2].startswith('"') and line.split(maxsplit=2)[2].endswith('"') else len(line.split(maxsplit=2)[2].strip('"')) <= 3:
@@ -299,7 +348,6 @@ while line_number < len(lines):
                             registry[line.split()[1].rstrip(",")] = product
                     except ValueError:
                         print(f"\nERROR \n'{line}'\nStrings must be enclosed in double quotes.")
-
             else:
                 time.sleep(0.0001)
                 if line.split()[2].startswith('"') and line.split()[2].endswith('"'):
@@ -358,6 +406,7 @@ while line_number < len(lines):
         # Inputs
         elif line.startswith("INP"):
             # Detect every keypress instead of input so that the input wont get echoed so it feels LOWLEVELLLL
+            # Uhh dont put input directly to HDD cuz idk it feels wrong
             allowed = r"""1234567890-=qwertyuiopasdfghjklzxcvbnm,[];'./{}:">?!@#$%^&*()_+`~\|"""
             # Tried it and it gave shiftAshift so here's whitelist
             slots = line.split()[1:]
@@ -368,6 +417,8 @@ while line_number < len(lines):
                         slot = slot.rstrip(",")
                         if slot.startswith("C"): # Yippee support for registers!
                             registry[slot] = key.name
+                        elif slot.startswith("H"):
+                            print("ERROR! Unable to write keyboard inputs directly to HDD")
                         else:
                             time.sleep(0.00001) # VERY VERY small delay
                             memory[slot] = key.name
@@ -376,6 +427,8 @@ while line_number < len(lines):
         elif line.startswith("PRINT"):
             if line.split()[1].startswith("C"):
                 print(str(registry[line.split()[1].rstrip(",")]).replace("\\n", ""), end="")
+            elif line.split()[1].startswith("H"):
+                print(str(read_hdd(line.split()[1].rstrip(","))).replace("\\n", ""), end="")
             else:
                 time.sleep(0.00001)
                 print(str(memory[line.split()[1].rstrip(",")]).replace("\\n", ""), end="")
@@ -388,11 +441,15 @@ while line_number < len(lines):
             to = line.split()[2].rstrip(",")
             if from_hehe.startswith("C"):
                 value = registry[from_hehe]
+            elif from_hehe.startswith("H"):
+                value = read_hdd(from_hehe)
             else:
                 time.sleep(0.00001)
                 value = memory[from_hehe]
             if to.startswith("C"):
                 registry[to] = value
+            elif to.startswith("H"):
+                write_hdd(to, value)
             else:
                 time.sleep(0.00001)
                 memory[to] = value
@@ -415,6 +472,7 @@ while line_number < len(lines):
                     line_number = labels[label]
         # Compare
         elif line.startswith("CMP"):
+            # Compare also can't compare directly from HDD
             a_slot = line.split()[1].rstrip(",")
             b_slot = line.split()[2]
             if a_slot.startswith("C"):
@@ -459,25 +517,38 @@ while line_number < len(lines):
         elif line.startswith("SIFNEQ"):
             if not last_cmp:
                 stop_loop = True
-        # Skip ahead 1 line if equal
+        # Skip ahead 1 line by default if equal
+        # You can also do IFEQ 5
         elif line.startswith("IFEQ"):
             if last_cmp:
-                line_number += 2 # Do 2 cuz it also skips the line_number+1 below
+                if len(line.split()) > 1:
+                        line_number += int(line.split()[1]) + 1
+                else:
+                    line_number += 2 # Do 2 cuz it also skips the line_number+1 below
                 continue
-        # Skip ahead 1 line if NOT equal
+        # Skip ahead 1 line by default if NOT equal
         elif line.startswith("INEQ"):
             if not last_cmp:
-                line_number += 2
+                if len(line.split()) > 1:
+                    line_number += int(line.split()[1]) + 1
+                else:
+                    line_number += 2
                 continue
-        # Skip ahead 1 line if first value is greater than second in last CMP
+        # Skip ahead 1 line by default if first value is greater than second in last CMP
         elif line.startswith("IFGR"):
             if greater:
-                line_number += 2
+                if len(line.split()) > 1:
+                    line_number += int(line.split()[1]) + 1
+                else:
+                    line_number += 2
                 continue
-        # Skip ahead 1 line if first value is lesser than second in last CMP
+        # Skip ahead 1 line by default if first value is lesser than second in last CMP
         elif line.startswith("IFLR"):
             if not greater and not last_cmp:
-                line_number += 2
+                if len(line.split()) > 1:
+                    line_number += int(line.split()[1]) + 1
+                else:
+                    line_number += 2
                 continue
         # Call and Return
         elif line.startswith("CALL"):
@@ -502,6 +573,16 @@ while line_number < len(lines):
             line_number = return_line # Just change line number to the return line to return there
         elif line.startswith("LOOP"):
             pass
+        # Some hdd specific instructions
+        elif line.startswith("COSLOT"): # Clears every occupied slot in HDD (Well technically, in reality it clears every slot, but who cares I called it CO for Clear Occupied)
+            hdd.seek(0)
+            hdd.write(b"\x00\x00\x00\x00" * 1397098)
+        elif line.startswith("CFSLOT"): # Clear a specifc slot eg. CFSLOT HA1
+            slot = line.split()[1].rstrip(",")
+            if slot.startswith("H"):
+                write_hdd(slot, "")
+            else:
+                print("\nERROR\nCFSLOT can only clear HDD slots.")
         else:
             unknown = line.split()[0].strip('"')
             print(f"\nERROR \n'{line}'\nUnknown instruction: '{unknown}'")
@@ -529,3 +610,4 @@ if print_info:
         print(f"Approx: {ticks_per_line:.6f} cpu clock cycles used per line on average")
     else:
         print(f"Approx: 0 cpu clock cycles used per line on average:\n0 lines found")
+hdd.close()

@@ -124,3 +124,8 @@ LOOP random
 CALL stdlib/random.nasm
 PRINT Z101 [NLNS]
 BNC random 10
+
+; Testing out the hdd thing, run this part after running write_to_hdd
+PRINT HA1
+CFSLOT HA1
+PRINT HA1

@@ -1,4 +1,4 @@
-; Pseudo Random Number Generator
+; Pseudo Random Number Generator Made by: https://github.com/CoolGuy158-Git
 ; A NASM stdlib for generating random numbers from 1-500 (Well max is 500 can't guarantee it will actually hit 500, depends on your seed)
 ; Seed is gonna be stored in Z100, output is gonna be in Z101 and Z102 is going to be used in checking if num is over 248
 ; Make sure to leave those memory slots unallocated for when you need randomness
