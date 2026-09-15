@@ -14,6 +14,8 @@ It is complete with virtual memory slots (A1-Z10000), representing 260 KB in the
 
 It also has registers (CA1-CZ100), representing 2.6 KB in the virtual CPU architecture.
 
+It has HDD too (HA1-HZ53773), it is the persistent storage, it represents 5.3mb in the virtual CPU architecture.
+
 <small>(Not the actual Python memory usage this assumes each slot = 1 byte.)</small>
 
 It's ISA contains 23 instructions.
