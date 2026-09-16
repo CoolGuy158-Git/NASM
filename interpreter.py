@@ -50,6 +50,7 @@ import time
 import psutil
 import threading
 import keyboard
+import traceback
 
 # Config
 memory_amount = 10000
@@ -67,6 +68,22 @@ def hdd_index(address): # Turn the hdd bins into like readable for python
 def read_hdd(address):
     hdd.seek(hdd_index(address))
     data = hdd.read(4)
+    if not data:
+        print(f"\nFATAL:\n HDD slot {address} is empty") # Yea this is kinda a fatal of an error cuz yea can't really skip it and move on (can you?) and the whole thing just stops
+        if print_info:
+            end = time.time()
+            elapsed = end - start
+            ticks = elapsed * ticks_per_sec
+            print(f"\n\nTotal run time: {elapsed:.6f} seconds")
+            print(f"Approx: {ticks:.6f} cpu clock cycles used in run time")
+            if line_number > 0:
+                ticks_per_line = ticks / line_number
+                print(f"Approx: {ticks_per_line:.6f} cpu clock cycles used per line on average")
+            else:
+                print(f"Approx: 0 cpu clock cycles used per line on average:\n0 lines found")
+            print("Program encountered a fatal error and was terminated")
+        hdd.close()
+        sys.exit(0)
     kind_of_data = data[0]
     value = int.from_bytes(data[1:], byteorder='little')
     if kind_of_data == 0:
@@ -90,6 +107,7 @@ def write_hdd(address, value):
         print("\nERROR\nHDD slots can only hold one character strings and 3 digit integers.")
         return
     hdd.write(data)
+
 ticks_per_sec = 0
 if print_info:
     # Get approx clock speed for info
@@ -592,12 +610,17 @@ while line_number < len(lines):
         print(f"\nSEGFAULT \n'{line}'\nMemory slot/register does not exist: {e.args[0]}")
         break
     except Exception as e:
+        traceback_info = traceback.extract_tb(e.__traceback__)
+        last = traceback_info[-1]
         print(f"\n\n\nOH NO!")
         print("I'm sorry :(")
         print("The interpreter encountered an error.") # Because the programmer is so bad at coding D:
         print("Please make an issue in github :), or even better fix it and PR :D")
         print("Error:")
         print(e)
+        print("More information:")
+        print(f"Line number: {last.lineno}")
+        print(f"Line: {last.line}")
         break
 if print_info:
     end = time.time()
