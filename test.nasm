@@ -121,11 +121,29 @@ PRINT CA1 [NLNS]
 SET Z100 234
 
 LOOP random
-CALL stdlib/random.nasm
+CALL stdlib/random/random.nasm
 PRINT Z101 [NLNS]
-BNC random 10
+BNC random 100
+ADD CA1 "R"
+PRINT CA1
+ADD CA1 "A"
+PRINT CA1
+ADD CA1 "N"
+PRINT CA1
+ADD CA1 "G"
+PRINT CA1
+ADD CA1 "E"
+PRINT CA1 [NLNS]
+; Now the randint
+; Set the max num
+SET Z107 15
+LOOP randint
+CALL stdlib/random/randint.nasm
+PRINT Z106 [NLNS]
+BNC randint 100
 
 ; Testing out the hdd thing, run this part after running write_to_hdd
 PRINT HA1
 CFSLOT HA1
 PRINT HA1
+
